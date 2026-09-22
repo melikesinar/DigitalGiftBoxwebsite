@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Boxed With Love</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Parisienne&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fbe4ec; --panel:#fffbfc; --ink:#3b2432; --muted:#9a6b81; --line:#eab7cb;
+  --accent:#d6668f; --accent-ink:#ffffff;
+  --font:Quicksand,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --script:Parisienne,"Segoe Script",cursive;
+  --hand:Caveat,"Segoe Script","Bradley Hand",cursive;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2a1620; --panel:#3a2030; --ink:#f5e4ee; --muted:#c99bb3; --line:#6b3550;
+    --accent:#ef8fb1; --accent-ink:#2a1620;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2a1620; --panel:#3a2030; --ink:#f5e4ee; --muted:#c99bb3; --line:#6b3550;
+  --accent:#ef8fb1; --accent-ink:#2a1620;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.5 var(--font)}
+main{max-width:560px;margin:0 auto;padding:22px 18px 56px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+h2{font:700 .95rem/1.2 var(--font);color:var(--muted);text-transform:lowercase;letter-spacing:.02em;margin:0 0 14px}
+.sub{text-align:center;color:var(--muted);margin:0 0 6px}
+.sub.small{font-size:.85rem;margin-top:8px}
+.small{color:var(--muted);font-size:.9rem;margin:8px 0 0}
+label.f{display:block;font-size:.85rem;color:var(--muted);margin:14px 0 6px;font-weight:600}
+section{margin-top:22px}
+
+/* --- header --- */
+.brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2px}
+.brand .logo{font:400 clamp(2.1rem,8vw,2.7rem)/1 var(--script);color:var(--ink)}
+.brand svg{width:32px;height:32px;color:var(--accent);flex:none}
+
+/* --- kutu sahnesi --- */
+.stage{position:relative;display:block;width:100%;background:none;border:0;padding:0;cursor:pointer;color:inherit}
+.stage svg{display:block;width:min(300px,78vw);height:auto;margin:-10px auto 0;overflow:visible}
+.stage.big svg{width:min(380px,86vw)}
+.lid{transition:transform .8s cubic-bezier(.3,1.3,.5,1);transform-origin:40px 200px}
+.peek{transition:transform .8s .15s ease-out;transform:translateY(72px)}
+.cast{transition:opacity .3s}
+svg.open .lid{transform:translate(-14px,-82px) rotate(-9deg)}
+svg.open .peek{transform:translateY(0)}
+svg.open .cast{opacity:0}
+.spark{position:absolute;left:50%;top:32%;font-size:20px;opacity:0;pointer-events:none}
+.burst .spark{animation:sp 1.3s ease-out forwards;animation-delay:var(--d)}
+@keyframes sp{
+  0%{opacity:0;transform:translate(-50%,0) scale(.4)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),var(--dy)) scale(1.2)}
+}
+
+/* --- layout: box on the left, cards on the right (wide screens) --- */
+.top-grid{display:grid;gap:18px;margin-top:22px}
+@media (min-width:760px){
+  main{max-width:920px}
+  .top-grid{grid-template-columns:270px 1fr;align-items:start}
+}
+.stack{display:flex;flex-direction:column;gap:18px}
+
+/* --- pink dotted card --- */
+.frame,.card{
+  position:relative;background:var(--panel);border:1.5px dashed var(--line);border-radius:16px;
+  background-image:radial-gradient(var(--line) .7px,transparent .7px);
+  background-size:12px 12px;background-position:-4px -4px;
+}
+.frame{padding:18px 14px 14px;text-align:center}
+.card{padding:18px 20px}
+
+/* --- kime/kimden --- */
+.tofrom{display:flex;flex-direction:column}
+.scriptlabel{font:400 1.5rem/1 var(--script);color:var(--ink)}
+.scriptinput{width:100%;border:0;border-bottom:1.5px solid var(--line);background:transparent;
+  font:400 1.35rem/1.4 var(--script);color:var(--ink);padding:2px 2px 10px;margin-bottom:12px;outline:none}
+.scriptinput::placeholder{color:var(--muted);font-family:var(--font);font-size:.8rem;font-weight:600}
+.scriptinput:focus{border-color:var(--accent)}
+
+/* --- color pickers: wheel + rectangle swatches --- */
+.crow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}
+.clabel{width:58px;flex:none;font:600 .85rem var(--font);color:var(--muted)}
+.wheel{position:relative;width:30px;height:30px;flex:none;border-radius:50%;overflow:hidden;cursor:pointer;
+  background:conic-gradient(#f44,#fc3,#5d5,#3cf,#55f,#e4e,#f44);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.wheel.on::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--cur);box-shadow:0 0 0 1.5px rgba(255,255,255,.9)}
+.wheel input{position:absolute;inset:0;opacity:0;cursor:pointer;border:0;padding:0;width:100%;height:100%}
+.wheel:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.wheel.sm{width:24px;height:24px}
+.wheel.sm.on::after{inset:5px}
+.rectsw{display:flex;flex-wrap:wrap;gap:7px;flex:1;min-width:150px}
+.rectsw-item{width:32px;height:23px;border-radius:6px;border:0;padding:0;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
+.rectsw-item[aria-pressed="true"]{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--ink)}
+.rectsw-item.sm{width:24px;height:19px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:7px 14px;border-radius:999px;border:1.5px solid var(--line);background:transparent;color:var(--ink);font:600 .82rem var(--font);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+.btn{padding:11px 18px;border-radius:999px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);font:700 .92rem var(--font);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;margin-top:12px}
+.row>*{flex:1;min-width:0}
+.inp{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:600 .95rem var(--font)}
+input[type=file]{width:100%;font:inherit;color:var(--muted)}
+
+/* --- add-content tiles --- */
+.adds{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stamp{display:grid;justify-items:center;gap:6px;padding:14px 4px;border:1.5px solid var(--line);border-radius:10px;
+  background:var(--panel);color:var(--muted);font:700 .78rem var(--font);cursor:pointer}
+.stamp svg{width:26px;height:26px;color:var(--accent)}
+.stamp:hover{border-color:var(--accent);color:var(--ink)}
+#panel{margin-top:16px}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.tools .gap{flex:1}
+.mini{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.mini svg{width:18px;height:18px;color:var(--accent);flex:none}
+.mini .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.x{border:0;background:none;color:var(--muted);font-size:1.3rem;line-height:1;cursor:pointer;padding:4px 8px}
+.pvimg{display:block;max-width:100%;max-height:220px;margin-top:12px;border-radius:4px}
+textarea.link{font-size:.8rem;word-break:break-all;resize:vertical}
+
+/* --- parchment paper (for notes/drawing, deliberately a different texture) --- */
+.parchment{position:relative;isolation:isolate;width:100%;padding:22px 24px;color:#4a3420}
+.parchment::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse at 18% 12%,rgba(255,255,255,.4),transparent 55%),
+    radial-gradient(ellipse at 88% 92%,rgba(120,80,30,.3),transparent 60%),
+    #ecd9a8;
+  filter:url(#rough);
+  box-shadow:0 8px 18px rgba(50,35,10,.3);
+}
+.paper-input{display:block;width:100%;min-height:130px;border:0;outline:none;background:transparent;resize:vertical;padding:0;color:#4a3420;font:500 1.45rem/1.35 var(--hand)}
+.paper-input::placeholder{color:#8a7350}
+.note{margin:0;font:500 1.5rem/1.35 var(--hand);white-space:pre-wrap;word-break:break-word;color:#4a3420}
+canvas.draw,canvas.dv{display:block;width:100%;aspect-ratio:1;touch-action:none}
+canvas.draw{cursor:crosshair}
+.parchment.tight{padding:14px}
+
+/* --- recipient view --- */
+.goodies{display:grid;gap:30px;margin-top:26px}
+.goodie{display:flex;justify-content:center;opacity:0;transform:translateY(30px) rotate(var(--r,0deg));animation:pop .7s ease-out forwards}
+@keyframes pop{to{opacity:1;transform:translateY(0) rotate(var(--r,0deg))}}
+.polaroid{margin:0;width:min(300px,100%);background:#fdfcf8;padding:12px 12px 6px;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+.polaroid img{display:block;width:100%;height:auto}
+.polaroid figcaption{min-height:1.8em;padding:10px 4px 4px;text-align:center;color:#3b2f2a;font:500 1.35rem/1.2 var(--hand)}
+.song{display:flex;align-items:center;gap:14px;width:100%;padding:14px 18px;background:var(--ink);color:var(--bg);border-radius:12px 12px 12px 2px;box-shadow:0 8px 18px rgba(0,0,0,.28)}
+.song .disc{flex:none;display:grid;place-items:center;width:52px;height:52px;border-radius:50%;color:#fff;background:repeating-radial-gradient(circle,#111 0 2px,#262626 2px 4px)}
+.song .disc svg{width:22px;height:22px}
+.song a{color:inherit;font-weight:700}
+.end{text-align:center;margin-top:34px}
+.back{margin-bottom:10px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::as{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<!-- Filter that gives paper edges a "torn" look -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="4" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="7"/>
+  </filter>
+</svg>
+<main id="app"></main>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- helpers ---------- */
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const app = $('#app');
+
+/* ---------- thin line icons ---------- */
+const ICONS = {
+  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a5 5 0 0 1 5-5h6a5 5 0 0 1 5 5v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-7Z"/><path d="M4 11h16M9 6V4M9 4h3"/><rect x="15" y="9" width="4" height="3" rx=".5"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M15 3v5h5"/><path d="M8 12h8M8 15.5h8M8 9h4"/></svg>',
+  photo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="14" height="14" rx="1.5" transform="rotate(-6 10 13)"/><rect x="7" y="4" width="14" height="14" rx="1.5" transform="rotate(6 14 11)"/><circle cx="17" cy="8" r="1.3" fill="currentColor" stroke="none"/></svg>',
+  draw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 8 0 1 0 0 16c1.2 0 2-1 2-2 0-.6-.3-1-.6-1.4-.3-.4-.6-.8-.6-1.3 0-.9.7-1.3 1.6-1.3H17c2.2 0 4-1.6 4-4C21 5.8 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="9.5" cy="7.3" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="7" r="1" fill="currentColor" stroke="none"/></svg>',
+  song: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>'
+};
+
+/* ---------- sabitler ---------- */
+const COLORS  = [
+  {n:'Red', c:'#d9534f'}, {n:'Pink', c:'#f0a6ca'}, {n:'Blue', c:'#5b8def'},
+  {n:'Green', c:'#4caf7a'}, {n:'Yellow', c:'#f2c14e'}, {n:'Kraft', c:'#c49a6c'}, {n:'Purple', c:'#8e6bd1'}
+];
+const RIBBONS = [
+  {n:'White', c:'#ffffff'}, {n:'Red', c:'#c62828'}, {n:'Gold', c:'#e0b04a'},
+  {n:'Navy', c:'#25406b'}, {n:'Pink', c:'#ff7eb6'}, {n:'Black', c:'#2b2b2b'}
+];
+const PATTERNS = ['Plain', 'Polka Dot', 'Striped'];
+const LAYOUTS  = ['Vertical', 'Diagonal'];
+const BOWS     = ['Classic', 'Full', 'Knot', 'None'];
+const INK   = ['#2b2622', '#c0392b', '#1e6fd9', '#2e9e5b', '#d99a00', '#8e44ad'];
+const SIZES = [2.5, 5, 9];
+const MAX = 6, MAXPHOTO = 2, LOGICAL = 300;
+
+/* ---------- durum ---------- */
+const blank = () => ({ v:1, to:'', from:'', box:COLORS[0].c, rib:RIBBONS[0].c, pat:0, lay:0, bow:0, items:[] });
+let pkg = blank();
+let boxOpen = false;
+
+/* =========================================================
+   1) BOX DRAWING (SVG) — colors and pattern come from the package data
+   ========================================================= */
+function boxSVG(p, open) {
+  const box = p.box, rib = p.rib;
+  const patDef = [
+    '',
+    '<pattern id="pt" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="9" cy="9" r="3" fill="#fff" fill-opacity=".5"/></pattern>',
+    '<pattern id="pt" width="20" height="20" patternUnits="userSpaceOnUse"><rect width="9" height="20" fill="#fff" fill-opacity=".25"/></pattern>'
+  ][p.pat];
+  const polyOv = pts => p.pat ? `<polygon points="${pts}" fill="url(#pt)"/>` : '';
+  const rectOv = (x, y, w, h) => p.pat ? `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#pt)"/>` : '';
+
+  const RS = `fill="${rib}" stroke="rgba(0,0,0,.3)" stroke-width="1"`;
+  const sat = (tag, a, g = 'rg') => `<${tag} ${a} ${RS}/><${tag} ${a} fill="url(#${g})"/>`;
+
+  const loopD  = 'M158 143 C150 118 118 96 96 106 C78 114 84 138 108 146 C126 152 146 150 158 146 Z';
+  const loopIn = 'M154 143 C146 124 122 110 104 116 C94 120 98 134 112 139 C126 144 142 145 154 145 Z';
+  const loopHi = 'M150 128 C140 114 122 108 108 111';
+  const tailD  = 'M156 148 C146 166 132 178 122 196 L113 216 L124 207 L135 222 C143 202 158 176 166 152 Z';
+  const tailCr = 'M154 160 C146 176 134 190 126 206';
+  const partsDef = `
+    <g id="loopL">
+      <path d="${loopD}" ${RS}/><path d="${loopD}" fill="url(#rg2)"/>
+      <path d="${loopIn}" fill="#000" fill-opacity=".2"/>
+      <path d="${loopHi}" stroke="#fff" stroke-opacity=".55" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    </g>
+    <g id="tailL">
+      <path d="${tailD}" ${RS}/><path d="${tailD}" fill="url(#rg2)"/>
+      <path d="${tailCr}" stroke="#000" stroke-opacity=".18" stroke-width="1.2" fill="none"/>
+    </g>`;
+
+  const both = (id, extra = '') =>
+    `<use href="#${id}" transform="${extra}"/><use href="#${id}" transform="translate(320 0) scale(-1 1) ${extra}"/>`;
+  const about = (t) => `translate(160 144) ${t} translate(-160 -144)`;
+
+  let bow = '';
+  if (p.bow !== 3) {
+    const knot = p.bow === 2
+      ? `<rect x="142" y="127" width="36" height="32" rx="12" ${RS}/><rect x="142" y="127" width="36" height="32" rx="12" fill="url(#rg)"/>`
+      : `<rect x="147" y="132" width="26" height="24" rx="9" ${RS}/><rect x="147" y="132" width="26" height="24" rx="9" fill="url(#rg)"/>`;
+    const fold = `<path d="M153 136 C151 144 151 148 153 153 M167 136 C169 144 169 148 167 153" stroke="#000" stroke-opacity=".22" stroke-width="1.2" fill="none"/>`;
+    if (p.bow === 1) bow += both('loopL', about('rotate(-34) scale(.94)'));
+    bow += both('tailL', p.bow === 2 ? about('scale(.82)') : '');
+    if (p.bow !== 2) bow += both('loopL');
+    bow += knot + fold;
+  }
+  const name = (p.to || '').trim();
+  const shown = name.length > 11 ? name.slice(0, 11) + '…' : name;
+
+  return `<svg viewBox="0 -30 320 350" class="${open ? 'open' : ''}" role="img" aria-label="Gift box">
+  <defs>${patDef}
+    <linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".5" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <linearGradient id="rg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
+    <linearGradient id="bh" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".12"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
+    <linearGradient id="bv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
+    <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></linearGradient>
+    <linearGradient id="rimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient>
+    <linearGradient id="castg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".4"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <filter id="blur" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="grain" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55"/></filter>
+    ${partsDef}
+  </defs>
+
+  <ellipse cx="160" cy="296" rx="128" ry="11" fill="#000" opacity=".3" filter="url(#blur)"/>
+
+  <polygon points="64,158 256,158 268,178 52,178" fill="${box}"/>
+  <polygon points="64,158 256,158 268,178 52,178" fill="#000" opacity=".55"/>
+  <polygon points="64,158 256,158 259,165 61,165" fill="#000" opacity=".22"/>
+
+  <g class="peek">
+    <g transform="rotate(-6 122 150)">
+      <rect x="92" y="112" width="68" height="70" rx="3" fill="#ecd9a8" stroke="rgba(0,0,0,.18)"/>
+      <path d="M102 128h46M102 140h38M102 152h44" stroke="#a88a55" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <g transform="rotate(7 200 150)">
+      <rect x="172" y="104" width="58" height="76" rx="2" fill="#fdfcf8" stroke="rgba(0,0,0,.18)"/>
+      <rect x="178" y="110" width="46" height="46" fill="#b9c9d0"/>
+      <path d="M178 156 L194 136 L204 148 L212 140 L224 156 Z" fill="#8fa8b2"/>
+    </g>
+  </g>
+
+  <g class="body">
+    <rect x="52" y="178" width="216" height="114" rx="3" fill="${box}"/>
+    ${rectOv(52, 178, 216, 114)}
+    <rect x="52" y="178" width="216" height="114" rx="3" fill="url(#bh)"/>
+    <rect x="52" y="178" width="216" height="114" rx="3" fill="url(#bv)"/>
+    <rect x="52" y="178" width="216" height="114" filter="url(#grain)" opacity=".35"/>
+    ${sat('rect', 'x="146" y="178" width="28" height="114"')}
+    <g transform="rotate(-3 98 258)">
+      <rect x="62" y="238" width="72" height="40" rx="3" fill="#fbf3df" stroke="rgba(0,0,0,.22)"/>
+      <text x="70" y="254" font-family="Caveat,cursive" font-size="13" fill="#7a6a5f">to:</text>
+      <text x="70" y="272" font-family="Caveat,cursive" font-size="17" font-weight="700" fill="#3b2f2a">${esc(shown)}</text>
+    </g>
+    <g class="cast"><rect x="52" y="200" width="216" height="20" fill="url(#castg)"/></g>
+  </g>
+
+  <g class="lid">
+    <polygon points="54,132 266,132 280,160 40,160" fill="${box}"/>
+    ${polyOv('54,132 266,132 280,160 40,160')}
+    <polygon points="54,132 266,132 280,160 40,160" fill="url(#tg)"/>
+    ${sat('polygon', 'points="149,132 171,132 174,160 146,160"')}
+    ${p.lay === 1 ? sat('polygon', 'points="50,140 270,140 275,150 45,150"', 'rg2') : ''}
+    <rect x="40" y="160" width="240" height="40" rx="3" fill="${box}"/>
+    ${rectOv(40, 160, 240, 40)}
+    <rect x="40" y="160" width="240" height="40" rx="3" fill="url(#rimg)"/>
+    <rect x="40" y="160" width="240" height="1.5" fill="#fff" opacity=".4"/>
+    <rect x="40" y="196" width="240" height="4" rx="1.5" fill="#000" opacity=".25"/>
+    ${sat('rect', 'x="146" y="160" width="28" height="40"')}
+    ${p.bow < 2 ? '<ellipse cx="160" cy="152" rx="62" ry="9" fill="#000" opacity=".2" filter="url(#blur)"/>' : ''}
+    ${bow}
+  </g>
+</svg>`;
+}
+
+function sparksHTML() {
+  return Array.from({length: 8}, (_, i) => {
+    const dx = Math.round((Math.random() - .5) * 280);
+    const dy = -Math.round(50 + Math.random() * 130);
+    return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;--d:${(i * .06).toFixed(2)}s">✨</span>`;
+  }).join('');
+}
+
+/* =========================================================
+   2) DRAWING: points are stored as strokes, not as pixels
+   ========================================================= */
+function paint(canvas, strokes) {
+  const ctx = canvas.getContext('2d');
+  const k = canvas.width / LOGICAL;
+  ctx.setTransform(k, 0, 0, k, 0, 0);
+  ctx.clearRect(0, 0, LOGICAL, LOGICAL);
+  ctx.lineCap = ctx.lineJoin = 'round';
+  for (const st of strokes) {
+    const p = st.p;
+    ctx.strokeStyle = st.c; ctx.lineWidth = st.s;
+    ctx.beginPath(); ctx.moveTo(p[0], p[1]);
+    if (p.length === 2) ctx.lineTo(p[0] + .1, p[1]);
+    for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+    ctx.stroke();
+  }
+}
+
+/* =========================================================
+   3) PHOTO: shrink + convert to JPEG so the link doesn't bloat
+   ========================================================= */
+function shrink(file, max = 280, q = .5) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onerror = reject;
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const k = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', q));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* =========================================================
+   4) TURN THE PACKAGE INTO A LINK: JSON → compress → base64url → #k=...
+   There is no server; the data travels inside the link itself.
+   ========================================================= */
+function toB64url(u8) {
+  let s = '';
+  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function fromB64url(str) {
+  str = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (str.length % 4) str += '=';
+  const bin = atob(str), u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+async function pipe(u8, stream) {
+  return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(stream)).arrayBuffer());
+}
+async function encode(obj) {
+  let bytes = new TextEncoder().encode(JSON.stringify(obj)), tag = '0';
+  if ('CompressionStream' in window) { bytes = await pipe(bytes, new CompressionStream('deflate-raw')); tag = '1'; }
+  return tag + toB64url(bytes);
+}
+async function decode(s) {
+  let bytes = fromB64url(s.slice(1));
+  if (s[0] === '1') bytes = await pipe(bytes, new DecompressionStream('deflate-raw'));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+/* Never trust data coming from the link: only accept the shape we expect */
+function sanitize(d) {
+  const idx = (v, len) => Math.max(0, Math.min(len - 1, parseInt(v) || 0));
+  const str = (v, n) => String(v ?? '').slice(0, n);
+  const col = (v, list) => /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : (list[+v] ? list[+v].c : list[0].c);
+  const out = { v:1, to:str(d.to,24), from:str(d.from,24),
+    box:col(d.box, COLORS), rib:col(d.rib, RIBBONS), pat:idx(d.pat, PATTERNS.length),
+    lay:idx(d.lay, LAYOUTS.length), bow:idx(d.bow, BOWS.length), items:[] };
+  for (const it of (Array.isArray(d.items) ? d.items : []).slice(0, MAX)) {
+    if (!it) continue;
+    if (it.t === 'note') out.items.push({ t:'note', text:str(it.text, 500) });
+    else if (it.t === 'photo' && /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(it.src || ''))
+      out.items.push({ t:'photo', src:it.src, cap:str(it.cap, 60) });
+    else if (it.t === 'draw' && Array.isArray(it.strokes))
+      out.items.push({ t:'draw', strokes: it.strokes.slice(0, 400).map(s => ({
+        c: /^#[0-9a-f]{6}$/i.test(s.c) ? s.c : '#000000',
+        s: Math.max(1, Math.min(12, +s.s || 3)),
+        p: (Array.isArray(s.p) ? s.p : []).slice(0, 4000).map(n => +n || 0)
+      })).filter(s => s.p.length >= 2) });
+    else if (it.t === 'song') {
+      const u = String(it.url || '');
+      out.items.push({ t:'song', title:str(it.title, 80), url: /^https?:\/\//i.test(u) ? u.slice(0, 300) : '' });
+    }
+  }
+  return out;
+}
+
+/* =========================================================
+   5) HAZIRLAMA EKRANI
+   ========================================================= */
+function renderBuilder() {
+  boxOpen = false;
+  app.innerHTML = `
+    <div class="brand"><span class="logo">Boxed With Love</span>${ICONS.mail}</div>
+    <p class="sub">Decorate your box, fill it up, and send the link.</p>
+
+    <div class="top-grid">
+      <div class="frame">
+        <button type="button" class="stage" id="stage" aria-label="Open or close the box"></button>
+        <p class="sub small">Tap the box to peek inside</p>
+      </div>
+
+      <div class="stack">
+        <div class="card tofrom">
+          <label class="scriptlabel" for="to">to:</label>
+          <input id="to" class="scriptinput" type="text" maxlength="24" placeholder="to">
+          <label class="scriptlabel" for="from">from:</label>
+          <input id="from" class="scriptinput" type="text" maxlength="24" placeholder="from">
+        </div>
+
+        <div class="card">
+          <h2>prepare your box</h2>
+          <div class="crow"><span class="clabel">box:</span><label class="wheel" id="boxWheel"><input type="color" aria-label="Pick your own box color"></label><div class="rectsw" id="boxSw"></div></div>
+          <div class="crow"><span class="clabel">ribbon:</span><label class="wheel" id="ribWheel"><input type="color" aria-label="Pick your own ribbon color"></label><div class="rectsw" id="ribSw"></div></div>
+          <label class="f">Ribbon style</label><div class="chips" id="laySeg"></div>
+          <label class="f">Bow</label><div class="chips" id="bowSeg"></div>
+          <label class="f">Box pattern</label><div class="chips" id="patSeg"></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>what's inside <span class="small" id="cnt"></span></h2>
+      <div class="adds" id="adds">
+        <button type="button" class="stamp" data-add="note">${ICONS.note}<span>note</span></button>
+        <button type="button" class="stamp" data-add="photo">${ICONS.photo}<span>photo</span></button>
+        <button type="button" class="stamp" data-add="draw">${ICONS.draw}<span>draw</span></button>
+        <button type="button" class="stamp" data-add="song">${ICONS.song}<span>song</span></button>
+      </div>
+      <div id="panel"></div>
+      <div id="list"></div>
+    </section>
+
+    <section class="card">
+      <h2>send</h2>
+      <div class="row">
+        <button type="button" class="btn" id="prevBtn">Preview</button>
+        <button type="button" class="btn primary" id="mkBtn">Create link</button>
+      </div>
+      <p class="small" id="msg" role="status"></p>
+      <div id="out"></div>
+    </section>`;
+
+  $('#to').value = pkg.to; $('#from').value = pkg.from;
+  $('#to').oninput   = e => { pkg.to = e.target.value; refreshBox(); };
+  $('#from').oninput = e => { pkg.from = e.target.value; };
+  $('#stage').onclick = () => { boxOpen = !boxOpen; $('#stage svg').classList.toggle('open', boxOpen); };
+  colorRow('#boxWheel', '#boxSw', COLORS, 'box');
+  colorRow('#ribWheel', '#ribSw', RIBBONS, 'rib');
+  chips($('#laySeg'), LAYOUTS, 'lay');
+  chips($('#bowSeg'), BOWS, 'bow');
+  chips($('#patSeg'), PATTERNS, 'pat');
+  refreshBox();
+  renderList();
+  $('#adds').onclick = e => { const b = e.target.closest('[data-add]'); if (b) openPanel(b.dataset.add); };
+  $('#prevBtn').onclick = () => {
+    if (!pkg.items.length) return msg('Add at least one thing to the box first.');
+    renderViewer(pkg, { preview:true }); window.scrollTo(0, 0);
+  };
+  $('#mkBtn').onclick = makeLink;
+}
+
+const msg = t => { const m = $('#msg'); if (m) m.textContent = t; };
+const refreshBox = () => { $('#stage').innerHTML = boxSVG(pkg, boxOpen); };
+
+/* Color row: the wheel on the left opens the full spectrum, the rectangles on the right are presets */
+function colorRow(wheelSel, listSel, list, key) {
+  const wheel = $(wheelSel), listEl = $(listSel), inp = $('input', wheel);
+  const cur = () => pkg[key].toLowerCase();
+  listEl.innerHTML = list.map(c =>
+    `<button type="button" class="rectsw-item" style="background:${c.c}" aria-label="${c.n}" data-c="${c.c}"></button>`).join('');
+  const sync = () => {
+    $$('.rectsw-item', listEl).forEach(b => b.setAttribute('aria-pressed', b.dataset.c === cur()));
+    wheel.classList.toggle('on', !list.some(c => c.c === cur()));
+    wheel.style.setProperty('--cur', pkg[key]);
+    inp.value = pkg[key];
+  };
+  listEl.onclick = e => {
+    const b = e.target.closest('.rectsw-item'); if (!b) return;
+    pkg[key] = b.dataset.c; sync(); refreshBox();
+  };
+  inp.oninput = () => { pkg[key] = inp.value; sync(); refreshBox(); };
+  sync();
+}
+function chips(el, list, key) {
+  el.innerHTML = list.map((n, i) =>
+    `<button type="button" class="chip" aria-pressed="${pkg[key] === i}" data-i="${i}">${n}</button>`).join('');
+  el.onclick = e => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    pkg[key] = +b.dataset.i; chips(el, list, key); refreshBox();
+  };
+}
+
+/* --- add-content panel --- */
+function closePanel() { $('#panel').innerHTML = ''; }
+function addItem(it) { pkg.items.push(it); closePanel(); renderList(); msg(''); }
+
+function openPanel(type) {
+  const P = $('#panel');
+  if (pkg.items.length >= MAX) { P.innerHTML = `<p class="small">The box is full — it only fits ${MAX} things. You can remove one.</p>`; return; }
+  if (type === 'photo' && pkg.items.filter(i => i.t === 'photo').length >= MAXPHOTO) {
+    P.innerHTML = `<p class="small">To keep the link short, you can add up to ${MAXPHOTO} photos.</p>`; return;
+  }
+  const actions = `<div class="row"><button type="button" class="btn" id="cancel">Cancel</button><button type="button" class="btn primary" id="ok">Add to box</button></div>`;
+
+  if (type === 'note') {
+    P.innerHTML = `<div class="parchment"><textarea id="txt" class="paper-input" maxlength="500" rows="5" placeholder="What do you want to say?" aria-label="Note"></textarea></div>` + actions;
+    $('#txt').focus();
+    $('#ok').onclick = () => { const t = $('#txt').value.trim(); if (t) addItem({ t:'note', text:t }); };
+  }
+
+  if (type === 'photo') {
+    P.innerHTML = `<label class="f" for="file">Choose a photo</label><input id="file" type="file" accept="image/*"><div id="pv"></div>
+      <label class="f" for="cap">Caption (optional)</label><input id="cap" class="inp" type="text" maxlength="60">` + actions;
+    let src = ''; $('#ok').disabled = true;
+    $('#file').onchange = e => {
+      const f = e.target.files[0]; if (!f) return;
+      shrink(f).then(s => {
+        src = s; $('#pv').innerHTML = `<img class="pvimg" src="${s}" alt="Your selected photo">`; $('#ok').disabled = false;
+      }).catch(() => { $('#pv').textContent = 'This file could not be read, try another photo.'; });
+    };
+    $('#ok').onclick = () => src && addItem({ t:'photo', src, cap:$('#cap').value.trim() });
+  }
+
+  if (type === 'draw') {
+    let strokes = [], col = INK[0], size = SIZES[1], cur = null;
+    P.innerHTML = `<div class="tools" id="tools">
+        ${INK.map((c, i) => `<button type="button" class="rectsw-item sm" style="background:${c}" data-c="${c}" aria-label="Color ${i + 1}" aria-pressed="${i === 0}"></button>`).join('')}
+        <label class="wheel sm" title="Pick your own color"><input type="color" id="pen" value="${INK[0]}" aria-label="Pick your own drawing color"></label>
+        <span class="gap"></span>
+        ${SIZES.map((s, i) => `<button type="button" class="chip" data-s="${s}" aria-pressed="${i === 1}">${['Thin','Medium','Thick'][i]}</button>`).join('')}
+      </div>
+      <div class="parchment tight"><canvas id="cv" class="draw" width="600" height="600" aria-label="Drawing area"></canvas></div>
+      <div class="row"><button type="button" class="btn" id="undo">Undo</button><button type="button" class="btn" id="clr">Clear</button></div>` + actions;
+    const cv = $('#cv');
+    const pt = e => { const r = cv.getBoundingClientRect();
+      return [Math.round((e.clientX - r.left) / r.width * LOGICAL), Math.round((e.clientY - r.top) / r.height * LOGICAL)]; };
+    cv.addEventListener('pointerdown', e => {
+      cv.setPointerCapture(e.pointerId);
+      cur = { c:col, s:size, p:pt(e) }; strokes.push(cur); paint(cv, strokes);
+    });
+    cv.addEventListener('pointermove', e => {
+      if (!cur) return;
+      const [x, y] = pt(e), p = cur.p, dx = x - p[p.length - 2], dy = y - p[p.length - 1];
+      if (dx * dx + dy * dy < 4) return;
+      p.push(x, y); paint(cv, strokes);
+    });
+    ['pointerup', 'pointercancel'].forEach(t => cv.addEventListener(t, () => { cur = null; }));
+    $('#tools').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.c) { col = b.dataset.c; $$('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#pen').parentElement.classList.remove('on'); }
+      if (b.dataset.s) { size = +b.dataset.s; $$('[data-s]').forEach(x => x.setAttribute('aria-pressed', x === b)); }
+    };
+    $('#pen').oninput = e => {
+      col = e.target.value; $$('[data-c]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      const l = e.target.parentElement; l.classList.add('on'); l.style.setProperty('--cur', col);
+    };
+    $('#undo').onclick = () => { strokes.pop(); paint(cv, strokes); };
+    $('#clr').onclick  = () => { strokes = []; paint(cv, strokes); };
+    $('#ok').onclick   = () => strokes.length && addItem({ t:'draw', strokes });
+  }
+
+  if (type === 'song') {
+    P.innerHTML = `<label class="f" for="st">Song title and artist</label><input id="st" class="inp" type="text" maxlength="80">
+      <label class="f" for="su">Listen link (YouTube, Spotify… optional)</label><input id="su" class="inp" type="url" placeholder="https://">` + actions;
+    $('#ok').onclick = () => {
+      const title = $('#st').value.trim(); let url = $('#su').value.trim();
+      if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+      if (title || url) addItem({ t:'song', title, url });
+    };
+  }
+  $('#cancel').onclick = closePanel;
+}
+
+function renderList() {
+  const label = it => it.t === 'note' ? it.text : it.t === 'photo' ? (it.cap || 'Photo') : it.t === 'draw' ? 'Drawing' : (it.title || it.url);
+  $('#cnt').textContent = `(${pkg.items.length}/${MAX})`;
+  $('#list').innerHTML = pkg.items.map((it, i) =>
+    `<div class="mini">${ICONS[it.t]}<span class="t">${esc(label(it))}</span>
+     <button type="button" class="x" data-rm="${i}" aria-label="Remove">×</button></div>`).join('');
+  $('#list').onclick = e => {
+    const b = e.target.closest('[data-rm]'); if (!b) return;
+    pkg.items.splice(+b.dataset.rm, 1); renderList();
+  };
+}
+
+/* --- link creation --- */
+async function copyText(text, input) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch { input.select(); try { return document.execCommand('copy'); } catch { return false; } }
+}
+async function makeLink() {
+  if (!pkg.items.length) return msg('Add at least one thing to the box first.');
+  msg('');
+  const link = location.href.split('#')[0] + '#k=' + await encode(pkg);
+  const n = link.length;
+  const note = n > 60000 ? 'The link is very long, many apps will cut it off. Remove the photo or simplify the drawing.'
+    : n > 30000 ? 'The link is long. Try opening it yourself before sending — some messaging apps may cut it off.'
+    : 'Link length looks fine.';
+  $('#out').innerHTML = `
+    <label class="f" for="lnk">Send to a friend (${n.toLocaleString('en-US')} characters)</label>
+    <textarea id="lnk" class="inp link" rows="3" readonly>${esc(link)}</textarea>
+    <div class="row"><button type="button" class="btn primary" id="cp">Copy</button>
+      ${navigator.share ? '<button type="button" class="btn" id="shr">Share…</button>' : ''}</div>
+    <p class="small">${note}</p>`;
+  $('#cp').onclick = async () => { $('#cp').textContent = (await copyText(link, $('#lnk'))) ? 'Copied' : 'Selected, copy manually'; };
+  if (navigator.share) $('#shr').onclick = () => navigator.share({ title:'You\'ve got a box', url:link }).catch(() => {});
+}
+
+/* =========================================================
+   6) RECIPIENT SCREEN: the box arrives closed, opens on tap
+   ========================================================= */
+function goodieHTML(it, i) {
+  const rot = [-2.5, 1.8, -1.2, 2.4, -2, 1.4][i % 6];
+  let inner = '';
+  if (it.t === 'note')  inner = `<div class="parchment"><p class="note">${esc(it.text)}</p></div>`;
+  if (it.t === 'photo') inner = `<figure class="polaroid"><img src="${it.src}" alt="Photo from the box"><figcaption>${esc(it.cap)}</figcaption></figure>`;
+  if (it.t === 'draw')  inner = `<div class="parchment tight"><canvas class="dv" width="600" height="600" data-i="${i}" aria-label="Drawing"></canvas></div>`;
+  if (it.t === 'song')  inner = `<div class="song"><div class="disc" aria-hidden="true">${ICONS.song}</div><div><b>${esc(it.title) || 'A song'}</b>${
+    it.url ? `<br><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Listen</a>` : ''}</div></div>`;
+  return `<div class="goodie" style="--r:${rot}deg;animation-delay:${(i * .3).toFixed(2)}s">${inner}</div>`;
+}
+
+function renderViewer(p, opt = {}) {
+  const from = p.from.trim();
+  app.innerHTML = `
+    ${opt.preview ? '<button type="button" class="btn back" id="back">Back to editing</button>' : ''}
+    <div class="brand"><span class="logo" style="font-size:clamp(1.7rem,6vw,2.2rem)">${from ? esc(from) + ' sent you a box' : "You\'ve got a box"}</span></div>
+    <p class="sub" id="hint">Tap the box to open it</p>
+    <div class="frame"><button type="button" class="stage big" id="stage" aria-label="Open the box">${boxSVG(p, false)}${sparksHTML()}</button></div>
+    <div class="goodies" id="goodies"></div>
+    <p class="end" id="end" hidden><button type="button" class="btn primary" id="endBtn">${opt.preview ? 'Back to editing' : 'Make your own box'}</button></p>`;
+
+  const goBack = () => { if (opt.preview) { renderBuilder(); } else { pkg = blank(); location.hash = ''; } };
+  if (opt.preview) $('#back').onclick = () => renderBuilder();
+  $('#endBtn').onclick = goBack;
+
+  let opened = false;
+  $('#stage').onclick = () => {
+    if (opened) return; opened = true;
+    $('#stage svg').classList.add('open'); $('#stage').classList.add('burst');
+    $('#hint').textContent = "Here's what was inside";
+    setTimeout(() => {
+      $('#goodies').innerHTML = p.items.map(goodieHTML).join('');
+      $$('canvas.dv').forEach(cv => paint(cv, p.items[cv.dataset.i].strokes));
+      $('#end').hidden = false;
+      $('#goodies').scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 750);
+  };
+}
+
+function renderError() {
+  app.innerHTML = `<div class="brand"><span class="logo">This link could not be opened</span></div>
+    <p class="sub">The link may have been cut off or corrupted when it was copied. Try asking the sender for it again.</p>
+    <p class="end"><button type="button" class="btn primary" id="mk">Make your own box</button></p>`;
+  $('#mk').onclick = () => { location.hash = ''; };
+}
+
+/* =========================================================
+   7) ROUTING: recipient view if the link has #k=, otherwise the builder
+   ========================================================= */
+async function route() {
+  const m = location.hash.match(/^#k=(.+)$/);
+  if (!m) { renderBuilder(); return; }
+  try { renderViewer(sanitize(await decode(m[1]))); }
+  catch { renderError(); }
+}
+addEventListener('hashchange', route);
+route();
+})();
+</script>
+</body>
+</html>
