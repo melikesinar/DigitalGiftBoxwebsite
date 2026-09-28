@@ -171,25 +171,45 @@ canvas.draw{cursor:crosshair}
 </style>
 </head>
 <body>
-<!-- Filter that gives paper edges a "torn" look -->
+
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
     <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="4" result="n"/>
     <feDisplacementMap in="SourceGraphic" in2="n" scale="7"/>
   </filter>
 </svg>
+
 <main id="app"></main>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+import { getDatabase, ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+// Firebase Ayarları
+const firebaseConfig = {
+  apiKey: "AIzaSyDarmRmIIkjldnB0p8z-iDXSEDEJ1Msi28",
+  authDomain: "digitalgiftbox-32fac.firebaseapp.com",
+  databaseURL: "https://digitalgiftbox-32fac-default-rtdb.firebaseio.com",
+  projectId: "digitalgiftbox-32fac",
+  storageBucket: "digitalgiftbox-32fac.firebasestorage.app",
+  messagingSenderId: "399396502901",
+  appId: "1:399396502901:web:8eed94e9bf023a5b77673c",
+  measurementId: "G-Q9DWSECPBP"
+};
+
+// Veritabanını başlat (Değişken ismini çakışma olmasın diye firebaseApp yaptık)
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getDatabase(firebaseApp);
+
+// Mevcut uygulamanın geri kalanı
 (() => {
 'use strict';
 
 /* ---------- helpers ---------- */
-const $  = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const $  = (s, r = document) => r.querySelector(s); const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const app = $('#app');
+const app = $('#app'); // Ana gövde değişkeni
 
 /* ---------- thin line icons ---------- */
 const ICONS = {
@@ -222,7 +242,7 @@ let pkg = blank();
 let boxOpen = false;
 
 /* =========================================================
-   1) BOX DRAWING (SVG) — colors and pattern come from the package data
+   1) BOX DRAWING (SVG)
    ========================================================= */
 function boxSVG(p, open) {
   const box = p.box, rib = p.rib;
@@ -344,9 +364,6 @@ function sparksHTML() {
   }).join('');
 }
 
-/* =========================================================
-   2) DRAWING: points are stored as strokes, not as pixels
-   ========================================================= */
 function paint(canvas, strokes) {
   const ctx = canvas.getContext('2d');
   const k = canvas.width / LOGICAL;
@@ -363,9 +380,6 @@ function paint(canvas, strokes) {
   }
 }
 
-/* =========================================================
-   3) PHOTO: shrink + convert to JPEG so the link doesn't bloat
-   ========================================================= */
 function shrink(file, max = 280, q = .5) {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
@@ -386,15 +400,6 @@ function shrink(file, max = 280, q = .5) {
   });
 }
 
-/* =========================================================
-   4) TURN THE PACKAGE INTO A LINK: JSON → compress → base64url → #k=...
-   There is no server; the data travels inside the link itself.
-   ========================================================= */
-function toB64url(u8) {
-  let s = '';
-  for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000));
-  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
 function fromB64url(str) {
   str = str.replace(/-/g, '+').replace(/_/g, '/');
   while (str.length % 4) str += '=';
@@ -405,18 +410,12 @@ function fromB64url(str) {
 async function pipe(u8, stream) {
   return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(stream)).arrayBuffer());
 }
-async function encode(obj) {
-  let bytes = new TextEncoder().encode(JSON.stringify(obj)), tag = '0';
-  if ('CompressionStream' in window) { bytes = await pipe(bytes, new CompressionStream('deflate-raw')); tag = '1'; }
-  return tag + toB64url(bytes);
-}
 async function decode(s) {
   let bytes = fromB64url(s.slice(1));
   if (s[0] === '1') bytes = await pipe(bytes, new DecompressionStream('deflate-raw'));
   return JSON.parse(new TextDecoder().decode(bytes));
 }
 
-/* Never trust data coming from the link: only accept the shape we expect */
 function sanitize(d) {
   const idx = (v, len) => Math.max(0, Math.min(len - 1, parseInt(v) || 0));
   const str = (v, n) => String(v ?? '').slice(0, n);
@@ -521,9 +520,8 @@ function renderBuilder() {
 const msg = t => { const m = $('#msg'); if (m) m.textContent = t; };
 const refreshBox = () => { $('#stage').innerHTML = boxSVG(pkg, boxOpen); };
 
-/* Color row: the wheel on the left opens the full spectrum, the rectangles on the right are presets */
 function colorRow(wheelSel, listSel, list, key) {
-  const wheel = $(wheelSel), listEl = $(listSel), inp = $('input', wheel);
+  const wheel = $(wheelSel), listEl = $(listSel), inp =$('input', wheel);
   const cur = () => pkg[key].toLowerCase();
   listEl.innerHTML = list.map(c =>
     `<button type="button" class="rectsw-item" style="background:${c.c}" aria-label="${c.n}" data-c="${c.c}"></button>`).join('');
@@ -549,7 +547,6 @@ function chips(el, list, key) {
   };
 }
 
-/* --- add-content panel --- */
 function closePanel() { $('#panel').innerHTML = ''; }
 function addItem(it) { pkg.items.push(it); closePanel(); renderList(); msg(''); }
 
@@ -604,13 +601,9 @@ function openPanel(type) {
       p.push(x, y); paint(cv, strokes);
     });
     ['pointerup', 'pointercancel'].forEach(t => cv.addEventListener(t, () => { cur = null; }));
-    $('#tools').onclick = e => {
-      const b = e.target.closest('button'); if (!b) return;
-      if (b.dataset.c) { col = b.dataset.c; $$('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#pen').parentElement.classList.remove('on'); }
-      if (b.dataset.s) { size = +b.dataset.s; $$('[data-s]').forEach(x => x.setAttribute('aria-pressed', x === b)); }
+    $('#tools').onclick = e => {       const b = e.target.closest('button'); if (!b) return;       if (b.dataset.c) { col = b.dataset.c; $$('[data-c]').forEach(x => x.setAttribute('aria-pressed', x === b)); $('#pen').parentElement.classList.remove('on'); }       if (b.dataset.s) { size = +b.dataset.s; $$('[data-s]').forEach(x => x.setAttribute('aria-pressed', x === b)); }
     };
-    $('#pen').oninput = e => {
-      col = e.target.value; $$('[data-c]').forEach(x => x.setAttribute('aria-pressed', 'false'));
+    $('#pen').oninput = e => {       col = e.target.value; $$('[data-c]').forEach(x => x.setAttribute('aria-pressed', 'false'));
       const l = e.target.parentElement; l.classList.add('on'); l.style.setProperty('--cur', col);
     };
     $('#undo').onclick = () => { strokes.pop(); paint(cv, strokes); };
@@ -642,27 +635,41 @@ function renderList() {
   };
 }
 
-/* --- link creation --- */
+/* --- FIREBASE LINK CREATION --- */
 async function copyText(text, input) {
   try { await navigator.clipboard.writeText(text); return true; }
   catch { input.select(); try { return document.execCommand('copy'); } catch { return false; } }
 }
+
 async function makeLink() {
-  if (!pkg.items.length) return msg('Add at least one thing to the box first.');
-  msg('');
-  const link = location.href.split('#')[0] + '#k=' + await encode(pkg);
-  const n = link.length;
-  const note = n > 60000 ? 'The link is very long, many apps will cut it off. Remove the photo or simplify the drawing.'
-    : n > 30000 ? 'The link is long. Try opening it yourself before sending — some messaging apps may cut it off.'
-    : 'Link length looks fine.';
-  $('#out').innerHTML = `
-    <label class="f" for="lnk">Send to a friend (${n.toLocaleString('en-US')} characters)</label>
-    <textarea id="lnk" class="inp link" rows="3" readonly>${esc(link)}</textarea>
-    <div class="row"><button type="button" class="btn primary" id="cp">Copy</button>
-      ${navigator.share ? '<button type="button" class="btn" id="shr">Share…</button>' : ''}</div>
-    <p class="small">${note}</p>`;
-  $('#cp').onclick = async () => { $('#cp').textContent = (await copyText(link, $('#lnk'))) ? 'Copied' : 'Selected, copy manually'; };
-  if (navigator.share) $('#shr').onclick = () => navigator.share({ title:'You\'ve got a box', url:link }).catch(() => {});
+  if (!pkg.items.length) return msg('Kutuya en az bir şey eklemelisin.');
+  msg('Veritabanına kaydediliyor, lütfen bekle...');
+  $('#mkBtn').disabled = true;
+
+  try {
+    const newBoxRef = push(ref(db, 'boxes'));
+    await set(newBoxRef, pkg);
+    
+    const shortId = newBoxRef.key;
+    const link = location.href.split('#')[0] + '#id=' + shortId;
+    
+    $('#out').innerHTML = `
+      <label class="f" for="lnk">Arkadaşına Gönder (Kısa Link)</label>
+      <textarea id="lnk" class="inp link" rows="2" readonly>${esc(link)}</textarea>
+      <div class="row">
+        <button type="button" class="btn primary" id="cp">Kopyala</button>
+        ${navigator.share ? '<button type="button" class="btn" id="shr">Paylaş…</button>' : ''}
+      </div>`;
+      
+    $('#cp').onclick = async () => { $('#cp').textContent = (await copyText(link, $('#lnk'))) ? 'Kopyalandı' : 'Kopyala'; };
+    if (navigator.share) $('#shr').onclick = () => navigator.share({ title:'Sana bir hediye kutusu geldi!', url:link }).catch(() => {});
+    msg('Bağlantı başarıyla oluşturuldu!');
+  } catch (error) {
+    msg('Hata oluştu. Bağlantıyı kontrol et.');
+    console.error(error);
+  } finally {
+    $('#mkBtn').disabled = false;
+  }
 }
 
 /* =========================================================
@@ -699,9 +706,7 @@ function renderViewer(p, opt = {}) {
     $('#stage svg').classList.add('open'); $('#stage').classList.add('burst');
     $('#hint').textContent = "Here's what was inside";
     setTimeout(() => {
-      $('#goodies').innerHTML = p.items.map(goodieHTML).join('');
-      $$('canvas.dv').forEach(cv => paint(cv, p.items[cv.dataset.i].strokes));
-      $('#end').hidden = false;
+      $('#goodies').innerHTML = p.items.map(goodieHTML).join('');       $$('canvas.dv').forEach(cv => paint(cv, p.items[cv.dataset.i].strokes));$('#end').hidden = false;
       $('#goodies').scrollIntoView({ behavior:'smooth', block:'start' });
     }, 750);
   };
@@ -715,13 +720,33 @@ function renderError() {
 }
 
 /* =========================================================
-   7) ROUTING: recipient view if the link has #k=, otherwise the builder
+   7) ROUTING: Firebase ve Eski Linkleri Yükleme
    ========================================================= */
 async function route() {
-  const m = location.hash.match(/^#k=(.+)$/);
+  // Eski upuzun URL'leri desteklemeye devam et
+  const oldUrl = location.hash.match(/^#k=(.+)$/);
+  if (oldUrl) {
+    try { renderViewer(sanitize(await decode(oldUrl[1]))); } catch { renderError(); }
+    return;
+  }
+
+  // Yeni kısa Firebase URL'lerini destekle
+  const m = location.hash.match(/^#id=(.+)$/);
   if (!m) { renderBuilder(); return; }
-  try { renderViewer(sanitize(await decode(m[1]))); }
-  catch { renderError(); }
+
+  app.innerHTML = `<div class="brand"><span class="logo" style="font-size:2rem; margin-top:40px;">Kutun Açılıyor...</span></div>`;
+
+  try {
+    const snapshot = await get(child(ref(db), `boxes/${m[1]}`));
+    if (snapshot.exists()) {
+      renderViewer(sanitize(snapshot.val()));
+    } else {
+      renderError();
+    }
+  } catch (error) {
+    console.error(error);
+    renderError();
+  }
 }
 addEventListener('hashchange', route);
 route();
