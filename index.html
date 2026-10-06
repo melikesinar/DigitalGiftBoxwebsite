@@ -43,13 +43,14 @@ label.f{display:block;font-size:.85rem;color:var(--muted);margin:14px 0 6px;font
 section{margin-top:22px}
 
 /* --- header --- */
-.brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:2px}
+.brand{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px}
 .brand .logo{font:400 clamp(2.1rem,8vw,2.7rem)/1 var(--script);color:var(--ink)}
+.brand-img{height:48px;width:auto;object-fit:contain;border-radius:4px}
 .brand svg{width:32px;height:32px;color:var(--accent);flex:none}
 
-/* --- kutu sahnesi --- */
-.stage{position:relative;display:block;width:100%;background:none;border:0;padding:0;cursor:pointer;color:inherit}
-.stage svg{display:block;width:min(300px,78vw);height:auto;margin:-10px auto 0;overflow:visible}
+/* --- box stage --- */
+.stage{position:relative;display:flex;justify-content:center;align-items:center;width:100%;background:none;border:0;padding:0;cursor:pointer;color:inherit;outline:none;}
+.stage svg{display:block;width:min(300px,78vw);height:auto;margin:0 auto;overflow:visible}
 .stage.big svg{width:min(380px,86vw)}
 .lid{transition:transform .8s cubic-bezier(.3,1.3,.5,1);transform-origin:40px 200px}
 .peek{transition:transform .8s .15s ease-out;transform:translateY(72px)}
@@ -63,6 +64,22 @@ svg.open .cast{opacity:0}
   0%{opacity:0;transform:translate(-50%,0) scale(.4)}
   25%{opacity:1}
   100%{opacity:0;transform:translate(calc(-50% + var(--dx)),var(--dy)) scale(1.2)}
+}
+@keyframes shake{
+  0%,100%{transform:rotate(0) translateX(0)}
+  15%{transform:rotate(-5deg) translateX(-4px)}
+  30%{transform:rotate(4deg) translateX(3px)}
+  45%{transform:rotate(-4deg) translateX(-3px)}
+  60%{transform:rotate(3deg) translateX(2px)}
+  75%{transform:rotate(-2deg) translateX(-1px)}
+}
+.stage.shaking svg{animation:shake .55s ease-in-out}
+.confetti-layer{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:3}
+.confetti{position:absolute;left:50%;top:40%;font-size:22px;opacity:0;animation:confetti-fly var(--dur) cubic-bezier(.2,.7,.3,1) forwards;animation-delay:var(--d)}
+@keyframes confetti-fly{
+  0%{opacity:0;transform:translate(-50%,0) rotate(0) scale(.5)}
+  12%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),var(--dy)) rotate(var(--rot)) scale(1.05)}
 }
 
 /* --- layout: box on the left, cards on the right (wide screens) --- */
@@ -82,7 +99,7 @@ svg.open .cast{opacity:0}
 .frame{padding:18px 14px 14px;text-align:center}
 .card{padding:18px 20px}
 
-/* --- kime/kimden --- */
+/* --- to/from --- */
 .tofrom{display:flex;flex-direction:column}
 .scriptlabel{font:400 1.5rem/1 var(--script);color:var(--ink)}
 .scriptinput{width:100%;border:0;border-bottom:1.5px solid var(--line);background:transparent;
@@ -116,6 +133,60 @@ svg.open .cast{opacity:0}
 .row>*{flex:1;min-width:0}
 .inp{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:600 .95rem var(--font)}
 input[type=file]{width:100%;font:inherit;color:var(--muted)}
+
+/* --- sticker picker (decorates the box itself) --- */
+.stickerpick{display:flex;flex-wrap:wrap;gap:8px}
+.stickerbtn{width:40px;height:40px;border-radius:11px;border:1.5px solid var(--line);background:var(--panel);
+  font-size:21px;cursor:pointer;display:grid;place-items:center;line-height:1}
+.stickerbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--accent)}
+
+/* --- flower picker & bouquet --- */
+.flowerpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.flowerbtn{display:grid;justify-items:center;gap:4px;padding:12px 4px;border:1.5px solid var(--line);border-radius:12px;
+  background:var(--panel);cursor:pointer;font:700 .72rem var(--font);color:var(--muted)}
+.flowerbtn .fe{font-size:28px}
+.flowerbtn[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, var(--panel));color:var(--ink)}
+.flowercard{display:grid;justify-items:center;gap:6px;width:min(220px,82%);margin:0 auto;padding:30px 20px 22px;
+  border-radius:50% 50% 10% 10% / 62% 62% 10% 10%;box-shadow:0 10px 20px rgba(0,0,0,.18)}
+
+.femoji{display:flex;justify-content:center;align-items:flex-end;min-height:2.5em;margin-top:10px;line-height:1;filter:drop-shadow(0 4px 6px rgba(0,0,0,.18))}
+.femoji span { display: inline-block; transform-origin: bottom center; transition: transform .3s ease; font-size: inherit; }
+
+/* Çapraz Buket - 2 flowers */
+.femoji span:first-child:nth-last-child(2) { transform: rotate(-15deg); margin-right: -0.2em; }
+.femoji span:first-child:nth-last-child(2) ~ span:nth-child(2) { transform: rotate(15deg); margin-left: -0.2em; }
+
+/* Çapraz Buket - 3 flowers */
+.femoji span:first-child:nth-last-child(3) { transform: rotate(-25deg); margin-right: -0.3em; }
+.femoji span:first-child:nth-last-child(3) ~ span:nth-child(2) { transform: rotate(0deg); z-index: 3; }
+.femoji span:first-child:nth-last-child(3) ~ span:nth-child(3) { transform: rotate(25deg); margin-left: -0.3em; }
+
+/* Çapraz Buket - 4 flowers */
+.femoji span:first-child:nth-last-child(4) { transform: rotate(-30deg); margin-right: -0.3em; }
+.femoji span:first-child:nth-last-child(4) ~ span:nth-child(2) { transform: rotate(-10deg); z-index: 3; }
+.femoji span:first-child:nth-last-child(4) ~ span:nth-child(3) { transform: rotate(10deg); z-index: 2; margin-left: -0.2em;}
+.femoji span:first-child:nth-last-child(4) ~ span:nth-child(4) { transform: rotate(30deg); margin-left: -0.3em; }
+
+/* Çapraz Buket - 5+ flowers */
+.femoji span:first-child:nth-last-child(n+5),
+.femoji span:first-child:nth-last-child(n+5) ~ span { margin: 0 -0.2em; }
+.femoji span:first-child:nth-last-child(n+5) { transform: rotate(-35deg); }
+.femoji span:first-child:nth-last-child(n+5) ~ span:nth-child(2) { transform: rotate(-15deg); z-index: 3; }
+.femoji span:first-child:nth-last-child(n+5) ~ span:nth-child(3) { transform: rotate(0deg); z-index: 4; }
+.femoji span:first-child:nth-last-child(n+5) ~ span:nth-child(4) { transform: rotate(15deg); z-index: 2; }
+.femoji span:first-child:nth-last-child(n+5) ~ span:nth-child(5) { transform: rotate(35deg); z-index: 1; }
+.femoji span:first-child:nth-last-child(n+5) ~ span:nth-child(6) { transform: rotate(45deg); z-index: 0; }
+.femoji span:only-child { transform: rotate(0deg); margin: 0; }
+
+.flabel{font:700 .85rem var(--font);color:#5a4350}
+
+/* --- location card --- */
+.place{display:flex;align-items:center;gap:14px;width:100%;padding:14px 18px;background:var(--panel);
+  border:1.5px solid var(--line);border-radius:12px 12px 12px 2px;box-shadow:0 8px 18px rgba(0,0,0,.14)}
+.place .pin{flex:none;width:44px;height:44px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center}
+.place .pin svg{width:22px;height:22px}
+.place b{color:var(--ink)}
+.place a{color:var(--accent);font-weight:700}
 
 /* --- add-content tiles --- */
 .adds{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -185,7 +256,7 @@ canvas.draw{cursor:crosshair}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 import { getDatabase, ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-// Firebase Ayarları
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDarmRmIIkjldnB0p8z-iDXSEDEJ1Msi28",
   authDomain: "digitalgiftbox-32fac.firebaseapp.com",
@@ -197,19 +268,20 @@ const firebaseConfig = {
   measurementId: "G-Q9DWSECPBP"
 };
 
-// Veritabanını başlat (Değişken ismini çakışma olmasın diye firebaseApp yaptık)
+// Initialize the database (named firebaseApp to avoid a naming clash)
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getDatabase(firebaseApp);
 
-// Mevcut uygulamanın geri kalanı
+// Rest of the app
 (() => {
 'use strict';
 
 /* ---------- helpers ---------- */
-const $  = (s, r = document) => r.querySelector(s); const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const app = $('#app'); // Ana gövde değişkeni
+const app = $('#app');
 
 /* ---------- thin line icons ---------- */
 const ICONS = {
@@ -217,10 +289,12 @@ const ICONS = {
   note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M15 3v5h5"/><path d="M8 12h8M8 15.5h8M8 9h4"/></svg>',
   photo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="14" height="14" rx="1.5" transform="rotate(-6 10 13)"/><rect x="7" y="4" width="14" height="14" rx="1.5" transform="rotate(6 14 11)"/><circle cx="17" cy="8" r="1.3" fill="currentColor" stroke="none"/></svg>',
   draw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a9 8 0 1 0 0 16c1.2 0 2-1 2-2 0-.6-.3-1-.6-1.4-.3-.4-.6-.8-.6-1.3 0-.9.7-1.3 1.6-1.3H17c2.2 0 4-1.6 4-4C21 5.8 17 3 12 3Z"/><circle cx="7.5" cy="11" r="1" fill="currentColor" stroke="none"/><circle cx="9.5" cy="7.3" r="1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="7" r="1" fill="currentColor" stroke="none"/></svg>',
-  song: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>'
+  song: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+  flower: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="5.5" r="2.6"/><circle cx="12" cy="18.5" r="2.6"/><circle cx="5.5" cy="12" r="2.6"/><circle cx="18.5" cy="12" r="2.6"/></svg>',
+  location: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.2 7-12.2a7 7 0 1 0-14 0C5 13.8 12 21 12 21Z"/><circle cx="12" cy="8.8" r="2.3"/></svg>'
 };
 
-/* ---------- sabitler ---------- */
+/* ---------- constants ---------- */
 const COLORS  = [
   {n:'Red', c:'#d9534f'}, {n:'Pink', c:'#f0a6ca'}, {n:'Blue', c:'#5b8def'},
   {n:'Green', c:'#4caf7a'}, {n:'Yellow', c:'#f2c14e'}, {n:'Kraft', c:'#c49a6c'}, {n:'Purple', c:'#8e6bd1'}
@@ -234,10 +308,27 @@ const LAYOUTS  = ['Vertical', 'Diagonal'];
 const BOWS     = ['Classic', 'Full', 'Knot', 'None'];
 const INK   = ['#2b2622', '#c0392b', '#1e6fd9', '#2e9e5b', '#d99a00', '#8e44ad'];
 const SIZES = [2.5, 5, 9];
-const MAX = 6, MAXPHOTO = 2, LOGICAL = 300;
+const MAX = 8, MAXPHOTO = 3, MAXSTICKERS = 6, LOGICAL = 300;
 
-/* ---------- durum ---------- */
-const blank = () => ({ v:1, to:'', from:'', box:COLORS[0].c, rib:RIBBONS[0].c, pat:0, lay:0, bow:0, items:[] });
+const STICKERS = [
+  {id:'heart', e:'💖'}, {id:'star', e:'⭐'}, {id:'blossom', e:'🌸'}, {id:'bow', e:'🎀'},
+  {id:'sparkle', e:'✨'}, {id:'butterfly', e:'🦋'}, {id:'rainbow', e:'🌈'}, {id:'confetti', e:'🎊'}
+];
+// Sticker slots in the box SVG's own coordinate space, kept clear of the "to:" tag and the ribbon.
+const LID_SLOTS  = [ {x:86,y:148,r:-13,s:.8}, {x:236,y:148,r:12,s:.8} ];
+const BODY_SLOTS = [ {x:210,y:224,r:-9,s:.92}, {x:238,y:256,r:11,s:.92}, {x:80,y:218,r:8,s:.85}, {x:205,y:282,r:-7,s:.85} ];
+
+const FLOWERS = [
+  {id:'rose',      e:'🌹', label:'Rose',      bg:'#f6d7de'},
+  {id:'tulip',     e:'🌷', label:'Tulip',     bg:'#fbe1ea'},
+  {id:'sunflower', e:'🌻', label:'Sunflower', bg:'#fdf0c6'},
+  {id:'daisy',     e:'🌼', label:'Daisy',     bg:'#fdf6d6'},
+  {id:'hibiscus',  e:'🌺', label:'Hibiscus',  bg:'#fbdee6'},
+  {id:'bouquet',   e:'💐', label:'Bouquet',   bg:'#ead9f5'}
+];
+
+/* ---------- state ---------- */
+const blank = () => ({ v:1, to:'', from:'', box:COLORS[0].c, rib:RIBBONS[0].c, pat:0, lay:0, bow:0, stickers:[], items:[] });
 let pkg = blank();
 let boxOpen = false;
 
@@ -291,21 +382,36 @@ function boxSVG(p, open) {
   const name = (p.to || '').trim();
   const shown = name.length > 11 ? name.slice(0, 11) + '…' : name;
 
-  return `<svg viewBox="0 -30 320 350" class="${open ? 'open' : ''}" role="img" aria-label="Gift box">
+  // Stickers the sender stuck on the box: a couple ride the lid, the rest sit on the front face.
+  const stickerAt = (id, slot) => {
+    const st = STICKERS.find(x => x.id === id); if (!st) return '';
+    return `<text x="${slot.x}" y="${slot.y}" transform="rotate(${slot.r} ${slot.x} ${slot.y})" text-anchor="middle"
+      font-size="${Math.round(27 * slot.s)}" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.3))">${st.e}</text>`;
+  };
+  const stickers = Array.isArray(p.stickers) ? p.stickers : [];
+  const lidStickers  = stickers.slice(0, 2).map((id, i) => stickerAt(id, LID_SLOTS[i])).join('');
+  const bodyStickers = stickers.slice(2, 6).map((id, i) => stickerAt(id, BODY_SLOTS[i])).join('');
+
+  return `<svg viewBox="0 60 320 260" class="${open ? 'open' : ''}" role="img" aria-label="Gift box">
   <defs>${patDef}
     <linearGradient id="rg" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".5" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
     <linearGradient id="rg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
-    <linearGradient id="bh" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".12"/><stop offset=".35" stop-color="#fff" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
-    <linearGradient id="bv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
-    <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity=".06"/></linearGradient>
-    <linearGradient id="rimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient>
-    <linearGradient id="castg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".4"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="bh" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".16"/><stop offset=".32" stop-color="#fff" stop-opacity=".1"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient>
+    <linearGradient id="bv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".1"/><stop offset=".18" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".26"/></linearGradient>
+    <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".4"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/></linearGradient>
+    <linearGradient id="rimg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".28"/></linearGradient>
+    <linearGradient id="castg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".45"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="edgeL" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".38"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient>
+    <linearGradient id="edgeR" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".46" stop-color="#fff" stop-opacity=".32"/><stop offset=".56" stop-color="#fff" stop-opacity=".32"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
     <filter id="blur" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="5"/></filter>
     <filter id="grain" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1.4 -.55"/></filter>
+    <clipPath id="bodyClip"><rect x="52" y="178" width="216" height="114" rx="3"/></clipPath>
+    <clipPath id="lidTopClip"><polygon points="54,132 266,132 280,160 40,160"/></clipPath>
     ${partsDef}
   </defs>
 
-  <ellipse cx="160" cy="296" rx="128" ry="11" fill="#000" opacity=".3" filter="url(#blur)"/>
+  <ellipse cx="160" cy="296" rx="128" ry="11" fill="#000" opacity=".32" filter="url(#blur)"/>
 
   <polygon points="64,158 256,158 268,178 52,178" fill="${box}"/>
   <polygon points="64,158 256,158 268,178 52,178" fill="#000" opacity=".55"/>
@@ -329,6 +435,11 @@ function boxSVG(p, open) {
     <rect x="52" y="178" width="216" height="114" rx="3" fill="url(#bh)"/>
     <rect x="52" y="178" width="216" height="114" rx="3" fill="url(#bv)"/>
     <rect x="52" y="178" width="216" height="114" filter="url(#grain)" opacity=".35"/>
+    <g clip-path="url(#bodyClip)">
+      <rect x="52" y="178" width="14" height="114" fill="url(#edgeL)"/>
+      <rect x="254" y="178" width="14" height="114" fill="url(#edgeR)"/>
+      <polygon points="52,292 150,178 190,178 52,232" fill="url(#sheen)"/>
+    </g>
     ${sat('rect', 'x="146" y="178" width="28" height="114"')}
     <g transform="rotate(-3 98 258)">
       <rect x="62" y="238" width="72" height="40" rx="3" fill="#fbf3df" stroke="rgba(0,0,0,.22)"/>
@@ -336,22 +447,25 @@ function boxSVG(p, open) {
       <text x="70" y="272" font-family="Caveat,cursive" font-size="17" font-weight="700" fill="#3b2f2a">${esc(shown)}</text>
     </g>
     <g class="cast"><rect x="52" y="200" width="216" height="20" fill="url(#castg)"/></g>
+    ${bodyStickers}
   </g>
 
   <g class="lid">
     <polygon points="54,132 266,132 280,160 40,160" fill="${box}"/>
     ${polyOv('54,132 266,132 280,160 40,160')}
     <polygon points="54,132 266,132 280,160 40,160" fill="url(#tg)"/>
+    <g clip-path="url(#lidTopClip)"><polygon points="40,160 120,132 150,132 55,160" fill="url(#sheen)" opacity=".8"/></g>
     ${sat('polygon', 'points="149,132 171,132 174,160 146,160"')}
     ${p.lay === 1 ? sat('polygon', 'points="50,140 270,140 275,150 45,150"', 'rg2') : ''}
     <rect x="40" y="160" width="240" height="40" rx="3" fill="${box}"/>
     ${rectOv(40, 160, 240, 40)}
     <rect x="40" y="160" width="240" height="40" rx="3" fill="url(#rimg)"/>
-    <rect x="40" y="160" width="240" height="1.5" fill="#fff" opacity=".4"/>
-    <rect x="40" y="196" width="240" height="4" rx="1.5" fill="#000" opacity=".25"/>
+    <rect x="40" y="160" width="240" height="1.5" fill="#fff" opacity=".45"/>
+    <rect x="40" y="196" width="240" height="4" rx="1.5" fill="#000" opacity=".28"/>
     ${sat('rect', 'x="146" y="160" width="28" height="40"')}
     ${p.bow < 2 ? '<ellipse cx="160" cy="152" rx="62" ry="9" fill="#000" opacity=".2" filter="url(#blur)"/>' : ''}
     ${bow}
+    ${lidStickers}
   </g>
 </svg>`;
 }
@@ -362,6 +476,24 @@ function sparksHTML() {
     const dy = -Math.round(50 + Math.random() * 130);
     return `<span class="spark" style="--dx:${dx}px;--dy:${dy}px;--d:${(i * .06).toFixed(2)}s">✨</span>`;
   }).join('');
+}
+
+/* Confetti + balloons that pop out on the first tap, before the box actually opens */
+const PARTY_PIECES = ['🎉','🎊','✨','💛','💖','⭐','🎈','🌟'];
+function partyBurst(container) {
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  layer.innerHTML = Array.from({length: 22}, () => {
+    const e = PARTY_PIECES[Math.floor(Math.random() * PARTY_PIECES.length)];
+    const dx = Math.round((Math.random() - .5) * 340);
+    const dy = -Math.round(90 + Math.random() * 190);
+    const rot = Math.round((Math.random() - .5) * 420);
+    const d = (Math.random() * .35).toFixed(2);
+    const dur = (1.1 + Math.random() * .6).toFixed(2);
+    return `<span class="confetti" style="--dx:${dx}px;--dy:${dy}px;--rot:${rot}deg;--d:${d}s;--dur:${dur}s">${e}</span>`;
+  }).join('');
+  container.appendChild(layer);
+  setTimeout(() => layer.remove(), 2200);
 }
 
 function paint(canvas, strokes) {
@@ -422,7 +554,9 @@ function sanitize(d) {
   const col = (v, list) => /^#[0-9a-f]{6}$/i.test(v) ? v.toLowerCase() : (list[+v] ? list[+v].c : list[0].c);
   const out = { v:1, to:str(d.to,24), from:str(d.from,24),
     box:col(d.box, COLORS), rib:col(d.rib, RIBBONS), pat:idx(d.pat, PATTERNS.length),
-    lay:idx(d.lay, LAYOUTS.length), bow:idx(d.bow, BOWS.length), items:[] };
+    lay:idx(d.lay, LAYOUTS.length), bow:idx(d.bow, BOWS.length),
+    stickers: (Array.isArray(d.stickers) ? d.stickers : []).filter(id => STICKERS.some(s => s.id === id)).slice(0, MAXSTICKERS),
+    items:[] };
   for (const it of (Array.isArray(d.items) ? d.items : []).slice(0, MAX)) {
     if (!it) continue;
     if (it.t === 'note') out.items.push({ t:'note', text:str(it.text, 500) });
@@ -438,17 +572,29 @@ function sanitize(d) {
       const u = String(it.url || '');
       out.items.push({ t:'song', title:str(it.title, 80), url: /^https?:\/\//i.test(u) ? u.slice(0, 300) : '' });
     }
+    else if (it.t === 'flower') {
+      const raw = Array.isArray(it.kinds) ? it.kinds : (it.kind ? [it.kind] : []);
+      const kinds = raw.filter(k => FLOWERS.some(f => f.id === k)).slice(0, 6);
+      if (kinds.length) out.items.push({ t:'flower', kinds });
+    }
+    else if (it.t === 'location') {
+      const u = String(it.url || '');
+      out.items.push({ t:'location', name:str(it.name, 60), url: /^https?:\/\//i.test(u) ? u.slice(0, 300) : '' });
+    }
   }
   return out;
 }
 
 /* =========================================================
-   5) HAZIRLAMA EKRANI
+   5) BUILDER SCREEN
    ========================================================= */
 function renderBuilder() {
   boxOpen = false;
   app.innerHTML = `
-    <div class="brand"><span class="logo">Boxed With Love</span>${ICONS.mail}</div>
+    <div class="brand">
+      <img src="watermarked_img_13074438334791701695.jpg" alt="Logo" class="brand-img">
+      <span class="logo">Boxed With Love</span>
+    </div>
     <p class="sub">Decorate your box, fill it up, and send the link.</p>
 
     <div class="top-grid">
@@ -472,6 +618,7 @@ function renderBuilder() {
           <label class="f">Ribbon style</label><div class="chips" id="laySeg"></div>
           <label class="f">Bow</label><div class="chips" id="bowSeg"></div>
           <label class="f">Box pattern</label><div class="chips" id="patSeg"></div>
+          <label class="f">Stickers (stick a few on the box)</label><div class="stickerpick" id="stickerRow"></div>
         </div>
       </div>
     </div>
@@ -483,6 +630,8 @@ function renderBuilder() {
         <button type="button" class="stamp" data-add="photo">${ICONS.photo}<span>photo</span></button>
         <button type="button" class="stamp" data-add="draw">${ICONS.draw}<span>draw</span></button>
         <button type="button" class="stamp" data-add="song">${ICONS.song}<span>song</span></button>
+        <button type="button" class="stamp" data-add="flower">${ICONS.flower}<span>flower</span></button>
+        <button type="button" class="stamp" data-add="location">${ICONS.location}<span>place</span></button>
       </div>
       <div id="panel"></div>
       <div id="list"></div>
@@ -507,6 +656,7 @@ function renderBuilder() {
   chips($('#laySeg'), LAYOUTS, 'lay');
   chips($('#bowSeg'), BOWS, 'bow');
   chips($('#patSeg'), PATTERNS, 'pat');
+  stickerPicker($('#stickerRow'));
   refreshBox();
   renderList();
   $('#adds').onclick = e => { const b = e.target.closest('[data-add]'); if (b) openPanel(b.dataset.add); };
@@ -544,6 +694,22 @@ function chips(el, list, key) {
   el.onclick = e => {
     const b = e.target.closest('.chip'); if (!b) return;
     pkg[key] = +b.dataset.i; chips(el, list, key); refreshBox();
+  };
+}
+
+/* Stickers decorate the box itself: multi-select, up to MAXSTICKERS */
+function stickerPicker(el) {
+  el.innerHTML = STICKERS.map(s =>
+    `<button type="button" class="stickerbtn" data-id="${s.id}" aria-pressed="${pkg.stickers.includes(s.id)}" aria-label="${s.id} sticker">${s.e}</button>`).join('');
+  el.onclick = e => {
+    const b = e.target.closest('.stickerbtn'); if (!b) return;
+    const id = b.dataset.id, i = pkg.stickers.indexOf(id);
+    if (i >= 0) pkg.stickers.splice(i, 1);
+    else {
+      if (pkg.stickers.length >= MAXSTICKERS) { msg(`You can stick up to ${MAXSTICKERS} stickers on the box.`); return; }
+      pkg.stickers.push(id);
+    }
+    stickerPicker(el); refreshBox(); msg('');
   };
 }
 
@@ -620,11 +786,50 @@ function openPanel(type) {
       if (title || url) addItem({ t:'song', title, url });
     };
   }
+
+  if (type === 'flower') {
+    const chosen = [];
+    P.innerHTML = `<p class="small" style="margin:0 0 10px">Pick a few — they'll go in as one bouquet.</p>
+      <div class="flowerpick" id="flowerpick">${FLOWERS.map(f =>
+      `<button type="button" class="flowerbtn" data-id="${f.id}" aria-pressed="false"><span class="fe">${f.e}</span><span>${f.label}</span></button>`).join('')}</div>` + actions;
+    $('#ok').disabled = true;
+    $('#flowerpick').onclick = e => {
+      const b = e.target.closest('.flowerbtn'); if (!b) return;
+      const id = b.dataset.id, i = chosen.indexOf(id);
+      if (i >= 0) chosen.splice(i, 1); else chosen.push(id);
+      b.setAttribute('aria-pressed', i < 0 ? 'true' : 'false');
+      $('#ok').disabled = chosen.length === 0;
+    };
+    $('#ok').onclick = () => chosen.length && addItem({ t:'flower', kinds: chosen.slice(0, 6) });
+  }
+
+  if (type === 'location') {
+    P.innerHTML = `<label class="f" for="pname">Place name</label><input id="pname" class="inp" type="text" maxlength="60" placeholder="e.g. Central Park, our first café">
+      <label class="f" for="purl">Map link (optional — we'll build one from the name if you skip this)</label><input id="purl" class="inp" type="url" placeholder="https://">` + actions;
+    $('#ok').onclick = () => {
+      const name = $('#pname').value.trim(); let url = $('#purl').value.trim();
+      if (url && !/^https?:\/\//i.test(url)) url = 'https://' + url;
+      if (!url && name) url = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name);
+      if (name || url) addItem({ t:'location', name, url });
+    };
+  }
   $('#cancel').onclick = closePanel;
 }
 
+function flowerKinds(it) { return Array.isArray(it.kinds) ? it.kinds : (it.kind ? [it.kind] : []); }
+function flowerLabel(it) {
+  const names = flowerKinds(it).map(k => (FLOWERS.find(f => f.id === k) || {}).label).filter(Boolean);
+  if (!names.length) return 'Flowers';
+  return names.length > 1 ? `Bouquet (${names.join(', ')})` : names[0];
+}
+
 function renderList() {
-  const label = it => it.t === 'note' ? it.text : it.t === 'photo' ? (it.cap || 'Photo') : it.t === 'draw' ? 'Drawing' : (it.title || it.url);
+  const label = it => it.t === 'note' ? it.text
+    : it.t === 'photo' ? (it.cap || 'Photo')
+    : it.t === 'draw' ? 'Drawing'
+    : it.t === 'flower' ? flowerLabel(it)
+    : it.t === 'location' ? (it.name || 'Location')
+    : (it.title || it.url);
   $('#cnt').textContent = `(${pkg.items.length}/${MAX})`;
   $('#list').innerHTML = pkg.items.map((it, i) =>
     `<div class="mini">${ICONS[it.t]}<span class="t">${esc(label(it))}</span>
@@ -642,30 +847,30 @@ async function copyText(text, input) {
 }
 
 async function makeLink() {
-  if (!pkg.items.length) return msg('Kutuya en az bir şey eklemelisin.');
-  msg('Veritabanına kaydediliyor, lütfen bekle...');
+  if (!pkg.items.length) return msg('Add at least one thing to the box first.');
+  msg('Saving to the database, please wait…');
   $('#mkBtn').disabled = true;
 
   try {
     const newBoxRef = push(ref(db, 'boxes'));
     await set(newBoxRef, pkg);
-    
+
     const shortId = newBoxRef.key;
     const link = location.href.split('#')[0] + '#id=' + shortId;
-    
+
     $('#out').innerHTML = `
-      <label class="f" for="lnk">Arkadaşına Gönder (Kısa Link)</label>
+      <label class="f" for="lnk">Send to a friend (short link)</label>
       <textarea id="lnk" class="inp link" rows="2" readonly>${esc(link)}</textarea>
       <div class="row">
-        <button type="button" class="btn primary" id="cp">Kopyala</button>
-        ${navigator.share ? '<button type="button" class="btn" id="shr">Paylaş…</button>' : ''}
+        <button type="button" class="btn primary" id="cp">Copy</button>
+        ${navigator.share ? '<button type="button" class="btn" id="shr">Share…</button>' : ''}
       </div>`;
-      
-    $('#cp').onclick = async () => { $('#cp').textContent = (await copyText(link, $('#lnk'))) ? 'Kopyalandı' : 'Kopyala'; };
-    if (navigator.share) $('#shr').onclick = () => navigator.share({ title:'Sana bir hediye kutusu geldi!', url:link }).catch(() => {});
-    msg('Bağlantı başarıyla oluşturuldu!');
+
+    $('#cp').onclick = async () => { $('#cp').textContent = (await copyText(link, $('#lnk'))) ? 'Copied' : 'Copy'; };
+    if (navigator.share) $('#shr').onclick = () => navigator.share({ title:"You've got a gift box!", url:link }).catch(() => {});
+    msg('Link created successfully!');
   } catch (error) {
-    msg('Hata oluştu. Bağlantıyı kontrol et.');
+    msg('Something went wrong. Please check your connection and try again.');
     console.error(error);
   } finally {
     $('#mkBtn').disabled = false;
@@ -683,6 +888,18 @@ function goodieHTML(it, i) {
   if (it.t === 'draw')  inner = `<div class="parchment tight"><canvas class="dv" width="600" height="600" data-i="${i}" aria-label="Drawing"></canvas></div>`;
   if (it.t === 'song')  inner = `<div class="song"><div class="disc" aria-hidden="true">${ICONS.song}</div><div><b>${esc(it.title) || 'A song'}</b>${
     it.url ? `<br><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Listen</a>` : ''}</div></div>`;
+  if (it.t === 'flower') {
+    const flowers = flowerKinds(it).map(k => FLOWERS.find(f => f.id === k)).filter(Boolean);
+    if (flowers.length) {
+      const bg = flowers[0].bg;
+      const size = flowers.length === 1 ? 66 : flowers.length <= 3 ? 56 : 42;
+      const emojis = flowers.map(f => `<span>${f.e}</span>`).join('');
+      const label = flowers.length > 1 ? 'Bouquet' : flowers[0].label;
+      inner = `<div class="flowercard" style="background:${bg}"><div class="femoji" style="font-size:${size}px">${emojis}</div><span class="flabel">${esc(label)}</span></div>`;
+    }
+  }
+  if (it.t === 'location') inner = `<div class="place"><div class="pin" aria-hidden="true">${ICONS.location}</div><div><b>${esc(it.name) || 'A place'}</b>${
+    it.url ? `<br><a href="${esc(it.url)}" target="_blank" rel="noopener noreferrer">Open in Maps</a>` : ''}</div></div>`;
   return `<div class="goodie" style="--r:${rot}deg;animation-delay:${(i * .3).toFixed(2)}s">${inner}</div>`;
 }
 
@@ -690,7 +907,10 @@ function renderViewer(p, opt = {}) {
   const from = p.from.trim();
   app.innerHTML = `
     ${opt.preview ? '<button type="button" class="btn back" id="back">Back to editing</button>' : ''}
-    <div class="brand"><span class="logo" style="font-size:clamp(1.7rem,6vw,2.2rem)">${from ? esc(from) + ' sent you a box' : "You\'ve got a box"}</span></div>
+    <div class="brand">
+      <img src="watermarked_img_13074438334791701695.jpg" alt="Logo" class="brand-img">
+      <span class="logo" style="font-size:clamp(1.7rem,6vw,2.2rem)">${from ? esc(from) + ' sent you a box' : "You\'ve got a box"}</span>
+    </div>
     <p class="sub" id="hint">Tap the box to open it</p>
     <div class="frame"><button type="button" class="stage big" id="stage" aria-label="Open the box">${boxSVG(p, false)}${sparksHTML()}</button></div>
     <div class="goodies" id="goodies"></div>
@@ -700,15 +920,29 @@ function renderViewer(p, opt = {}) {
   if (opt.preview) $('#back').onclick = () => renderBuilder();
   $('#endBtn').onclick = goBack;
 
-  let opened = false;
+  let step = 0; // 0 closed, 1 confetti popped, 2 open
   $('#stage').onclick = () => {
-    if (opened) return; opened = true;
-    $('#stage svg').classList.add('open'); $('#stage').classList.add('burst');
-    $('#hint').textContent = "Here's what was inside";
+    if (step === 0) {
+      step = 1;
+      partyBurst($('#stage'));
+      $('#stage').classList.add('shaking');
+      setTimeout(() => $('#stage').classList.remove('shaking'), 550);
+      $('#hint').textContent = 'Tap again to open it!';
+      return;
+    }
+    if (step !== 1) return;
+    step = 2;
+    $('#stage').classList.add('shaking');
+    $('#hint').textContent = 'Opening…';
     setTimeout(() => {
-      $('#goodies').innerHTML = p.items.map(goodieHTML).join('');       $$('canvas.dv').forEach(cv => paint(cv, p.items[cv.dataset.i].strokes));$('#end').hidden = false;
-      $('#goodies').scrollIntoView({ behavior:'smooth', block:'start' });
-    }, 750);
+      $('#stage').classList.remove('shaking');
+      $('#stage svg').classList.add('open'); $('#stage').classList.add('burst');
+      $('#hint').textContent = "Here's what was inside";
+      setTimeout(() => {
+        $('#goodies').innerHTML = p.items.map(goodieHTML).join('');         $$('canvas.dv').forEach(cv => paint(cv, p.items[cv.dataset.i].strokes));$('#end').hidden = false;
+        $('#goodies').scrollIntoView({ behavior:'smooth', block:'start' });
+      }, 750);
+    }, 550);
   };
 }
 
@@ -720,21 +954,25 @@ function renderError() {
 }
 
 /* =========================================================
-   7) ROUTING: Firebase ve Eski Linkleri Yükleme
+   7) ROUTING: loads Firebase links and legacy self-contained links
    ========================================================= */
 async function route() {
-  // Eski upuzun URL'leri desteklemeye devam et
+  // Keep supporting old, long self-contained links
   const oldUrl = location.hash.match(/^#k=(.+)$/);
   if (oldUrl) {
     try { renderViewer(sanitize(await decode(oldUrl[1]))); } catch { renderError(); }
     return;
   }
 
-  // Yeni kısa Firebase URL'lerini destekle
+  // New short Firebase-backed links
   const m = location.hash.match(/^#id=(.+)$/);
   if (!m) { renderBuilder(); return; }
 
-  app.innerHTML = `<div class="brand"><span class="logo" style="font-size:2rem; margin-top:40px;">Kutun Açılıyor...</span></div>`;
+  app.innerHTML = `
+    <div class="brand">
+      <img src="watermarked_img_13074438334791701695.jpg" alt="Logo" class="brand-img">
+      <span class="logo" style="font-size:2rem; margin-top:40px;">Opening your box…</span>
+    </div>`;
 
   try {
     const snapshot = await get(child(ref(db), `boxes/${m[1]}`));
